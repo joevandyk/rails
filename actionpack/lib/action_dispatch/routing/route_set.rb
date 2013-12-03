@@ -97,9 +97,7 @@ module ActionDispatch
           @routes = {}
           @helpers = []
 
-          @module = Module.new do
-            instance_methods.each { |selector| remove_method(selector) }
-          end
+          @module = Module.new
         end
 
         def helper_names
@@ -108,13 +106,11 @@ module ActionDispatch
 
         def clear!
           @helpers.each do |helper|
-            @module.module_eval do
-              remove_possible_method helper
-            end
+            @module.remove_possible_method helper
           end
 
-          @routes = {}
-          @helpers = []
+          @routes.clear
+          @helpers.clear
         end
 
         def add(name, route)
@@ -615,9 +611,10 @@ module ActionDispatch
       def recognize_path(path, environment = {})
         method = (environment[:method] || "GET").to_s.upcase
         path = Journey::Router::Utils.normalize_path(path) unless path =~ %r{://}
+        extras = environment[:extras] || {}
 
         begin
-          env = Rack::MockRequest.env_for(path, {:method => method})
+          env = Rack::MockRequest.env_for(path, {:method => method, :params => extras})
         rescue URI::InvalidURIError => e
           raise ActionController::RoutingError, e.message
         end

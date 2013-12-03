@@ -229,6 +229,30 @@ module ApplicationTests
       end
     end
 
+    def test_root_path
+      app('development')
+
+      controller :foo, <<-RUBY
+        class FooController < ApplicationController
+          def index
+            render :text => "foo"
+          end
+        end
+      RUBY
+
+      app_file 'config/routes.rb', <<-RUBY
+        AppTemplate::Application.routes.draw do
+          get 'foo', :to => 'foo#index'
+          root :to => 'foo#index'
+        end
+      RUBY
+
+      remove_file 'public/index.html'
+
+      get '/'
+      assert_equal 'foo', last_response.body
+    end
+
     test 'routes are added and removed when reloading' do
       app('development')
 
@@ -298,6 +322,51 @@ module ApplicationTests
       assert_raises NoMethodError do
         assert_equal '/bar', Rails.application.routes.url_helpers.bar_path
       end
+    end
+
+    test 'named routes are cleared when reloading' do
+      app('development')
+
+      controller :foo, <<-RUBY
+        class FooController < ApplicationController
+          def index
+            render :text => "foo"
+          end
+        end
+      RUBY
+
+      controller :bar, <<-RUBY
+        class BarController < ApplicationController
+          def index
+            render :text => "bar"
+          end
+        end
+      RUBY
+
+      app_file 'config/routes.rb', <<-RUBY
+        Rails.application.routes.draw do
+          get ':locale/foo', :to => 'foo#index', :as => 'foo'
+        end
+      RUBY
+
+      get '/en/foo'
+      assert_equal 'foo', last_response.body
+      assert_equal '/en/foo', Rails.application.routes.url_helpers.foo_path(:locale => 'en')
+
+      app_file 'config/routes.rb', <<-RUBY
+        Rails.application.routes.draw do
+          get ':locale/bar', :to => 'bar#index', :as => 'foo'
+        end
+      RUBY
+
+      Rails.application.reload_routes!
+
+      get '/en/foo'
+      assert_equal 404, last_response.status
+
+      get '/en/bar'
+      assert_equal 'bar', last_response.body
+      assert_equal '/en/bar', Rails.application.routes.url_helpers.foo_path(:locale => 'en')
     end
 
     test 'resource routing with irregular inflection' do

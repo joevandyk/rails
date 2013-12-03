@@ -156,7 +156,7 @@ module ActionView
 
         begin
           value = number_with_precision(number, options.merge(:raise => true))
-          format.gsub(/%n/, value).gsub(/%u/, unit).html_safe
+          format.gsub(/%n/, ERB::Util.html_escape(value)).gsub(/%u/, ERB::Util.html_escape(unit)).html_safe
         rescue InvalidNumberError => e
           if options[:raise]
             raise
@@ -593,7 +593,7 @@ module ActionView
 
         unit = case units
         when Hash
-          units[DECIMAL_UNITS[display_exponent]]
+          units[DECIMAL_UNITS[display_exponent]] || ''
         when String, Symbol
           I18n.translate(:"#{units}.#{DECIMAL_UNITS[display_exponent]}", :locale => options[:locale], :count => number.to_i)
         else

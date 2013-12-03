@@ -61,6 +61,13 @@ module RenderTestCases
     end
   end
 
+  def test_render_using_context_format_as_default
+    @view.lookup_context.formats = [:html]
+    assert_equal "partial html", @view.render('test/partial')
+    assert_equal "partial js", @view.render(:partial => 'test/partial', :formats => :js)
+    assert_equal "partial html", @view.render('test/partial')
+  end
+
   def test_render_file_with_locale
     assert_equal "<h1>Kein Kommentar</h1>", @view.render(:file => "comments/empty", :locale => [:de])
     assert_equal "<h1>Kein Kommentar</h1>", @view.render(:file => "comments/empty", :locale => :de)
