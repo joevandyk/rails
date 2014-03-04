@@ -3,6 +3,10 @@ require "cases/helper"
 class PostgresqlArray < ActiveRecord::Base
 end
 
+class PostgresqlDefault < ActiveRecord::Base
+  self.table_name = 'defaults'
+end
+
 class PostgresqlTsvector < ActiveRecord::Base
 end
 
@@ -37,6 +41,8 @@ class PostgresqlDataTypeTest < ActiveRecord::TestCase
     @connection = ActiveRecord::Base.connection
     @connection.execute("set lc_monetary = 'C'")
 
+    @first_default = PostgresqlDefault.create!
+
     @connection.execute("INSERT INTO postgresql_arrays (id, commission_by_quarter, nicknames) VALUES (1, '{35000,21000,18000,17000}', '{foo,bar,baz}')")
     @first_array = PostgresqlArray.find(1)
 
@@ -70,6 +76,13 @@ class PostgresqlDataTypeTest < ActiveRecord::TestCase
   def teardown
     [PostgresqlArray, PostgresqlTsvector, PostgresqlMoney, PostgresqlNumber, PostgresqlTime, PostgresqlNetworkAddress,
      PostgresqlBitString, PostgresqlOid, PostgresqlTimestampWithZone].each(&:delete_all)
+  end
+
+  def test_defaults
+    p
+    p @first_default.inspect
+    assert @first_default.tomorrow_time > @first_default.modified_time_function
+    p
   end
 
   def test_array_escaping

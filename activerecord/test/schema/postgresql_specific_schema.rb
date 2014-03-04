@@ -25,6 +25,7 @@ ActiveRecord::Schema.define do
     modified_date_function date default now(),
     fixed_date date default '2004-01-01',
     modified_time timestamp default CURRENT_TIMESTAMP,
+    tomorrow_time timestamp default now() + interval '1 day',
     modified_time_function timestamp default now(),
     fixed_time timestamp default '2004-01-01 00:00:00.000000-00',
     char1 char(1) default 'Y',
