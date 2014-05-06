@@ -51,20 +51,25 @@ module ActiveRecord
           end
         end
 
-        def add_custom_type options
-          options.each do |name, type|
-            custom_types[name.to_s] = type
+        @@custom_types_mutex = Mutex.new
+        def add_custom_type(options)
+          @@custom_types_mutex.synchronize do
+            options.each do |name, type|
+              custom_types[name.to_s] = type
+            end
           end
         end
 
-        def custom_type_for field_type
-          custom_types[field_type.to_s]
+        def custom_type_for(field_type)
+          @@custom_types_mutex.synchronize do
+            custom_types[field_type.to_s]
+          end
         end
 
         private
 
         def custom_types
-          Thread.current[:custom_types] ||= {}
+          @custom_types ||= {}
         end
       end
       # :startdoc:

@@ -6,11 +6,11 @@ class TaggedLoggingTest < ActiveSupport::TestCase
   class MyLogger < ::Logger
     attr_accessor :last_message
     attr_accessor :last_progname
-    
+
     def flush(*)
       info "[FLUSHED]"
     end
-    
+
     def add(severity, message = nil, progname = nil, &block)
       @last_message = message
       @last_progname = progname
