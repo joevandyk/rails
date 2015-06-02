@@ -162,6 +162,12 @@ if ActiveRecord::Base.connection.supports_extensions?
       assert_not hstore.changed?
     end
 
+    def test_null_bytes
+      x = Hstore.new(settings: { null_byte: "joe\u0000" })
+      x.save!
+      assert_equal "joe\u0000", x.settings['null_byte']
+    end
+
     def test_gen1
       assert_equal(%q(" "=>""), @column.cast_type.type_cast_for_database({' '=>''}))
     end
