@@ -155,6 +155,25 @@ class HasManyAssociationsTest < ActiveRecord::TestCase
     assert_not_equal sql, capture_sql { post.comments.to_a }
   end
 
+  # All these three tests are has_many associations.
+  # This one breaks because there's a `where` in the scope.
+  def test_broke_1
+    developer = Developer.new(contracts: [Contract.new])
+    assert_equal(developer.contracts.first.developer, developer)
+  end
+
+  # This one breaks because of `accepts_nested_attributes_for :contracts`
+  def test_broke_2
+    developer = Developer.new(comments: [Comment.new])
+    assert_equal(developer.comments.first.developer,  developer)
+  end
+
+  # This works just fine
+  def test_works
+    developer = Developer.new(audit_logs: [AuditLog.new])
+    assert_equal(developer.audit_logs.first.developer,  developer)
+  end
+
   def test_has_many_build_with_options
     college = College.create(name: 'UFMT')
     Student.create(active: true, college_id: college.id, name: 'Sarah')

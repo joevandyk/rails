@@ -51,6 +51,8 @@ class Developer < ActiveRecord::Base
   has_many :comments, ->(developer) { where(body: "I'm #{developer.name}") }
   has_many :ratings, through: :comments
 
+  accepts_nested_attributes_for :contracts
+
   scope :jamises, -> { where(:name => 'Jamis') }
 
   validates_inclusion_of :salary, :in => 50000..200000
