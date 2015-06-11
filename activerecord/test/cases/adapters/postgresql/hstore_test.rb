@@ -142,6 +142,14 @@ if ActiveRecord::Base.connection.supports_extensions?
       assert_equal "GMT", y.timezone
     end
 
+    def test_find_or_initialize_by
+      x = Hstore.find_or_initialize_by(language: 'fr')
+      x.save
+      y = Hstore.find_or_initialize_by(language: 'fr')
+      y.save
+      assert_equal(x, y)
+    end
+
     def test_yaml_round_trip_with_store_accessors
       x = Hstore.new(language: "fr", timezone: "GMT")
       assert_equal "fr", x.language
